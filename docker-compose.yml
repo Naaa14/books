@@ -6,7 +6,7 @@ services:
   php-apache:
     build: ./php
     ports:
-      - "8080:80"
+      - 8080:80
     volumes:
       - ./html:/var/www/html
     restart: always
@@ -24,6 +24,9 @@ services:
       # MYSQL_DATABASE: sample_db
       # MYSQL_USER: sample_user
     MYSQL_ROOT_PASSWORD: pass
+    volumes:
+      - ./sql/initdb.d:/docker-entrypoint-initdb.d
+      - ./sql/data:/var/lib/mysql
 
   # phpmyadminコンテナ
   pma-container:
@@ -42,6 +45,3 @@ services:
     depends_on:
       - mysql-container
     restart: always
-    volumes:
-      - ./sql/initdb.d:/docker-entrypoint-initdb.d
-      - ./sql/data:/var/lib/mysql
