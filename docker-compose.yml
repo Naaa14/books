@@ -16,17 +16,14 @@ services:
   # MySQL
   mysql-container:
     build: ./sql
-    # ports:
-    #   - 3306:3306
+    ports:
+      - 3306:3306
     restart: always
     environment:
       # MYSQL_ROOT_PASSWORD: sample_root_password
       # MYSQL_DATABASE: sample_db
       # MYSQL_USER: sample_user
-    MYSQL_ROOT_PASSWORD: pass
-    volumes:
-      - ./sql/initdb.d:/docker-entrypoint-initdb.d
-      - ./sql/data:/var/lib/mysql
+      - MYSQL_ROOT_PASSWORD=pass
 
   # phpmyadminコンテナ
   pma-container:
@@ -45,3 +42,6 @@ services:
     depends_on:
       - mysql-container
     restart: always
+    volumes:
+      - ./sql/initdb.d:/docker-entrypoint-initdb.d
+      - ./sql/data:/var/lib/mysql
