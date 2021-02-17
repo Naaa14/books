@@ -1,0 +1,54 @@
+
+# versionは２で決まり
+version: "2"
+
+services:
+  # データボリュームコンテナ
+  db-container:
+    # イメージは軽量os busyboxを選択します
+    image: busybox
+    volumes:
+      # ボリューム名はdb-volume マウント位置はMySQLのデータベース保存ディレクトリ
+      - db-volume:/var/lib/mysql/
+      # ローカルの/sqlディレクトリに設置したsqlファイルを初期データとして読み込み
+      - ./sql:/docker-entrypoint-initdb.d/initdb.sql
+
+  # MySQLコンテナ
+  mysql-container:
+    # イメージはmysql バージョン5系を選択します
+    image: mysql:5.7
+    # 環境変数の設定
+    environment:
+      - MYSQL_ROOT_PASSWORD=pass
+    # MySQLコンテナの文字コードの指定
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    # データボリューム・コンテナのマウント
+    volumes_from:
+      - db-container
+    # 起動順序 db-containerの後
+    depends_on:
+      - db-container
+    # 異常などで停止した際に自動再起動
+    restart: always
+
+  # phpmyadminコンテナ
+  pma-container:
+    # イメージはphpmyadminを選択します
+    image: phpmyadmin/phpmyadmin
+    # 環境変数の設定
+    environment:
+      - PMA_HOST=mysql-container
+      - PMA_USER=root
+      - PMA_PASSWORD=pass
+    # 外部ブラウザからのアクセスポート:内部コンテナのポートの接続
+    ports:
+      - 8080:80
+    # 起動順序 mysql-containerの後
+    depends_on:
+      - mysql-container
+    restart: always
+
+
+# データボリュームコンテナのデータボリューム
+volumes:
+  db-volume:
